@@ -1,83 +1,70 @@
 name: Integration Deployment
 
 on:
-  push:
+  pull_request:
     branches:
       - integration
 
 jobs:
-  deploy:
+  validate:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Check Magento directories
-        working-directory: integration
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: mbstring, intl, bcmath, soap, zip, pdo_mysql
+          tools: composer
+
+      - name: Validate Composer files
+        working-directory: integration/src
         run: |
-          echo "Current directory:"
-          pwd
-
-          echo "Magento directories:"
-          ls -ld src
-          ls -ld src/app
-          ls -ld src/app/design || true
-          ls -ld src/dev/tools/grunt/configs || true
-          ls -ld src/generated || true
-          ls -ld src/var || true
-
-          echo "Git tracked files:"
-          git ls-files src/app/design src/dev/tools/grunt/configs src/generated src/var
-      - name: Generate Docker versions
-        working-directory: integration
-        run: ./bin/detect-versions magento 2.4.9
-
-      - name: Start Magento
-        working-directory: integration
-        run: ./bin/start
-
-      - name: Start Magento
-        working-directory: integration
-        run: ./bin/start
-
-      - name: Check Magento containers
-        working-directory: integration
-        run: ./bin/status
+          composer validate --no-check-publish
 
       - name: Install Composer dependencies
-        working-directory: integration
-        run: ./bin/composer install --no-interaction
-
-      - name: Compile Magento
-        working-directory: integration
-        run: ./bin/magento setup:di:compile
-
-      - name: Enable maintenance mode
-        working-directory: integration
-        run: ./bin/magento maintenance:enable
-
-      - name: Deploy Magento
-        working-directory: integration
+        working-directory: integration/src
         run: |
-          ./bin/magento setup:upgrade
-          ./bin/magento cache:flush
-          ./bin/magento indexer:reindex
+          composer install \
+            --no-interaction \
+            --no-progress \
+            --prefer-dist
 
-      - name: Disable maintenance mode
-        working-directory: integration
-        run: ./bin/magento maintenance:disable
-
-      - name: Post deployment cache warmup
-        working-directory: integration
+      - name: Validate PHP syntax
+        working-directory: integration/src
         run: |
-          ./bin/magento cache:flush
+          find app/code -type f -name "*.php" -print0 | \
+            xargs -0 -n1 php -l
 
-          BASE_URL=$(./bin/magento config:show web/unsecure/base_url)
+      - name: Run Magento coding standard
+        working-directory: integration/src
+        run: |
+          if [ -x vendor/bin/phpcs ]; then
+            vendor/bin/phpcs app/code
+          else
+            echo "PHP_CodeSniffer is not installed. Skipping."
+          fi
 
-          echo "Warming cache: $BASE_URL"
+      - name: Run PHPStan
+        working-directory: integration/src
+        run: |
+          if [ -x vendor/bin/phpstan ]; then
+            vendor/bin/phpstan analyse app/code --no-progress
+          else
+            echo "PHPStan is not installed. Skipping."
+          fi
 
-          curl -fsS "$BASE_URL" > /dev/null
+      - name: Run unit tests
+        working-directory: integration/src
+        run: |
+          if [ -x vendor/bin/phpunit ]; then
+            vendor/bin/phpunit
+          else
+            echo "PHPUnit is not installed. Skipping."
+          fi
 
-      - name: Deployment complete
-        run: echo "Integration deployment completed successfully"
+      - name: Validation complete
+        run: echo "Magento validation completed successfully."
