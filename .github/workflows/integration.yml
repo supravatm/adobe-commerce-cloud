@@ -7,41 +7,53 @@ on:
 
 jobs:
   deploy:
-    name: Deploy Integration
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Start Integration Docker
+      - name: Start Magento
         working-directory: integration
-        run: docker compose up -d
-        
-      - name: Show Docker services
+        run: bin/start
+
+      - name: Check Magento containers
         working-directory: integration
-        run: docker compose ps
+        run: bin/status
 
-      - name: Show environment
-        run: |
-          echo "Environment: Integration"
-          echo "Branch: ${{ github.ref_name }}"
-          echo "Commit: ${{ github.sha }}"
+      - name: Install Composer dependencies
+        working-directory: integration
+        run: bin/composer install --no-interaction
 
-      - name: Validate deployment scripts
-        run: |
-          test -x deployment/build.sh || chmod +x deployment/build.sh
-          test -x deployment/deploy.sh || chmod +x deployment/deploy.sh
-          test -x deployment/post-deploy.sh || chmod +x deployment/post-deploy.sh
+      - name: Compile Magento
+        working-directory: integration
+        run: bin/magento setup:di:compile
 
-      - name: Build
-        run: |
-          ./deployment/build.sh integration
+      - name: Enable maintenance mode
+        working-directory: integration
+        run: bin/magento maintenance:enable
 
-      - name: Deploy
+      - name: Deploy Magento
+        working-directory: integration
         run: |
-          ./deployment/deploy.sh integration
+          bin/magento setup:upgrade
+          bin/magento cache:flush
+          bin/magento indexer:reindex
 
-      - name: Post deployment validation
+      - name: Disable maintenance mode
+        working-directory: integration
+        run: bin/magento maintenance:disable
+
+      - name: Post deployment cache warmup
+        working-directory: integration
         run: |
-          ./deployment/post-deploy.sh integration
+          bin/magento cache:flush
+
+          BASE_URL=$(bin/magento config:show web/unsecure/base_url)
+
+          echo "Warming cache: $BASE_URL"
+
+          curl -fsS "$BASE_URL" > /dev/null
+
+      - name: Deployment complete
+        run: echo "Integration deployment completed successfully"
