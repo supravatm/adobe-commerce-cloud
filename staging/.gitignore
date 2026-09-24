@@ -15,7 +15,7 @@ compose.versions.yaml
 !/src/app/code/
 !/src/app/design/
 !/src/app/etc/
-env.php
+!/src/app/etc/env.php
 
 # Track everything inside app/code
 !/src/app/code/**
