@@ -1,0 +1,38 @@
+# IDE / OS
+.DS_Store
+.vscode/
+.idea/
+CHANGELOG.md
+template/
+# Local Docker override
+compose.versions.yaml
+
+# Sensitive Magento configuration
+/src/*
+
+# Allow required parent directories
+!/src/app/
+!/src/app/code/
+!/src/app/design/
+!/src/app/etc/
+!/src/app/etc/env.php
+
+# Track everything inside app/code
+!/src/app/code/**
+
+# Track everything inside app/design
+!/src/app/design/**
+
+# Track specific app/etc files
+!/src/app/etc/config.php
+!/src/app/etc/db_schema.xml
+!/src/app/etc/di.xml
+
+# Track root files
+!/src/composer.json
+!/src/composer.lock
+!/src/.user.ini
+!/src/.editorconfig
+
+# Ignore macOS files everywhere
+**/.DS_Store
