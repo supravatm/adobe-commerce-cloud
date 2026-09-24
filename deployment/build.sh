@@ -23,9 +23,11 @@ echo "$MAGENTO_DIR"
 
 cd "$MAGENTO_DIR"
 
-docker compose exec -T phpfpm composer install --no-interaction
+docker compose exec -T phpfpm \
+    composer --working-dir=/var/www/html install --no-interaction
 
-docker compose exec -T phpfpm php bin/magento setup:di:compile
+docker compose exec -T phpfpm \
+    php /var/www/html/bin/magento setup:di:compile
 
 echo "=== BUILD COMPLETE ==="
 
