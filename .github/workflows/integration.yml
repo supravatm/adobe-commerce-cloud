@@ -48,4 +48,4 @@ jobs:
           fi
 
       - name: Validation complete
-        run: echo "Integration validation completed successfully."
+        run: echo "Integration validation completed successfully." 
