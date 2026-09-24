@@ -15,11 +15,11 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Start Integration Docker
-        working-directory: integration/src
+        working-directory: integration
         run: docker compose up -d
         
       - name: Show Docker services
-        working-directory: integration/src
+        working-directory: integration
         run: docker compose ps
 
       - name: Show environment

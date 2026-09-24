@@ -16,7 +16,7 @@ echo "Starting deployment: $ENVIRONMENT"
 echo "======================================"
 
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-MAGENTO_DIR="$PROJECT_ROOT/$ENVIRONMENT/src"
+MAGENTO_DIR="$PROJECT_ROOT/$ENVIRONMENT"
 
 echo "Magento directory:"
 echo "$MAGENTO_DIR"
