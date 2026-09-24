@@ -10,53 +10,53 @@ jobs:
     runs-on: ubuntu-latest
     environment: integration
 
-  steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '8.5'
-        extensions: mbstring, intl, bcmath, soap, zip, pdo_mysql
-        tools: composer
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: mbstring, intl, bcmath, soap, zip, pdo_mysql
+          tools: composer
 
-    - name: Validate Composer
-      working-directory: integration/src
-      run: composer validate --no-check-publish
+      - name: Validate Composer
+        working-directory: integration/src
+        run: composer validate --no-check-publish
 
       - name: Configure Magento Composer authentication
-      working-directory: integration/src
-      env:
-        MAGENTO_USERNAME: ${{ secrets.MAGENTO_USERNAME }}
-        MAGENTO_PASSWORD: ${{ secrets.MAGENTO_PASSWORD }}
-      run: |
-        composer config --global http-basic.repo.magento.com \
-          "$MAGENTO_USERNAME" \
-          "$MAGENTO_PASSWORD"
+        working-directory: integration/src
+        env:
+          MAGENTO_USERNAME: ${{ secrets.MAGENTO_USERNAME }}
+          MAGENTO_PASSWORD: ${{ secrets.MAGENTO_PASSWORD }}
+        run: |
+          composer config --global http-basic.repo.magento.com \
+            "$MAGENTO_USERNAME" \
+            "$MAGENTO_PASSWORD"
 
-    - name: Install Composer dependencies
-      working-directory: integration/src
-      run: |
-        composer install \
-          --no-interaction \
-          --no-progress \
-          --prefer-dist
+      - name: Install Composer dependencies
+        working-directory: integration/src
+        run: |
+          composer install \
+            --no-interaction \
+            --no-progress \
+            --prefer-dist
 
-    - name: Validate PHP syntax
-      working-directory: integration/src
-      run: |
-        find app/code -type f -name "*.php" -print0 | \
-          xargs -0 -n1 php -l
+      - name: Validate PHP syntax
+        working-directory: integration/src
+        run: |
+          find app/code -type f -name "*.php" -print0 | \
+            xargs -0 -n1 php -l
 
-    - name: Run PHPUnit
-      working-directory: integration/src
-      run: |
-        if [ -x vendor/bin/phpunit ]; then
-          vendor/bin/phpunit
-        else
-          echo "PHPUnit is not configured. Skipping."
-        fi
+      - name: Run PHPUnit
+        working-directory: integration/src
+        run: |
+          if [ -x vendor/bin/phpunit ]; then
+            vendor/bin/phpunit
+          else
+            echo "PHPUnit is not configured. Skipping."
+          fi
 
-    - name: Validation complete
-      run: echo "Integration validation completed successfully." 
+      - name: Validation complete
+        run: echo "Integration validation completed successfully."
