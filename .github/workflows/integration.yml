@@ -14,6 +14,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Start Integration Docker
+        working-directory: integration/src
+        run: docker compose up -d
+        
+      - name: Show Docker services
+        working-directory: integration/src
+        run: docker compose ps
+
       - name: Show environment
         run: |
           echo "Environment: Integration"
