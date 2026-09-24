@@ -7,7 +7,7 @@ echo "=== BUILD START ==="
 ENVIRONMENT=$1
 
 if [ -z "$ENVIRONMENT" ]; then
-    echo "Usage: ./deployment/release.sh <integration|staging|production>"
+    echo "Usage: ./deployment/build.sh <integration|staging|production>"
     exit 1
 fi
 

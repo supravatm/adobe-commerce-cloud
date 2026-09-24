@@ -1,0 +1,40 @@
+name: Production Deployment
+
+on:
+  push:
+    branches:
+      - production
+
+jobs:
+  deploy:
+    name: Deploy Production
+    runs-on: ubuntu-latest
+
+    environment:
+      name: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Show environment
+        run: |
+          echo "Environment: Production"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Commit: ${{ github.sha }}"
+
+      - name: Validate deployment scripts
+        run: |
+          chmod +x deployment/*.sh
+
+      - name: Build
+        run: |
+          ./deployment/build.sh
+
+      - name: Deploy
+        run: |
+          ./deployment/deploy.sh production
+
+      - name: Post deployment validation
+        run: |
+          ./deployment/post-deploy.sh production

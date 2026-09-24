@@ -2,16 +2,35 @@
 
 set -e
 
-echo "=== DEPLOY START ==="
+ENVIRONMENT=$1
 
-php bin/magento maintenance:enable
+if [ -z "$ENVIRONMENT" ]; then
+    echo "Usage: ./deployment/deploy.sh <integration|staging|production>"
+    exit 1
+fi
 
-php bin/magento setup:upgrade
+PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+MAGENTO_DIR="$PROJECT_ROOT/$ENVIRONMENT/src"
 
-php bin/magento cache:flush
+echo "======================================"
+echo "Starting deployment: $ENVIRONMENT"
+echo "Magento directory: $MAGENTO_DIR"
+echo "======================================"
 
-php bin/magento indexer:reindex
+cd "$MAGENTO_DIR"
 
-php bin/magento maintenance:disable
+docker compose exec -T phpfpm php bin/magento maintenance:enable
+
+trap 'docker compose exec -T phpfpm php bin/magento maintenance:disable' EXIT
+
+docker compose exec -T phpfpm php bin/magento setup:upgrade
+
+docker compose exec -T phpfpm php bin/magento cache:flush
+
+docker compose exec -T phpfpm php bin/magento indexer:reindex
+
+docker compose exec -T phpfpm php bin/magento maintenance:disable
+
+trap - EXIT
 
 echo "=== DEPLOY COMPLETE ==="
