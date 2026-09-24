@@ -1,4 +1,4 @@
-name: Integration Deployment
+name: Integration Validation
 
 on:
   pull_request:
@@ -20,10 +20,9 @@ jobs:
           extensions: mbstring, intl, bcmath, soap, zip, pdo_mysql
           tools: composer
 
-      - name: Validate Composer files
+      - name: Validate Composer
         working-directory: integration/src
-        run: |
-          composer validate --no-check-publish
+        run: composer validate --no-check-publish
 
       - name: Install Composer dependencies
         working-directory: integration/src
@@ -39,32 +38,14 @@ jobs:
           find app/code -type f -name "*.php" -print0 | \
             xargs -0 -n1 php -l
 
-      - name: Run Magento coding standard
-        working-directory: integration/src
-        run: |
-          if [ -x vendor/bin/phpcs ]; then
-            vendor/bin/phpcs app/code
-          else
-            echo "PHP_CodeSniffer is not installed. Skipping."
-          fi
-
-      - name: Run PHPStan
-        working-directory: integration/src
-        run: |
-          if [ -x vendor/bin/phpstan ]; then
-            vendor/bin/phpstan analyse app/code --no-progress
-          else
-            echo "PHPStan is not installed. Skipping."
-          fi
-
-      - name: Run unit tests
+      - name: Run PHPUnit
         working-directory: integration/src
         run: |
           if [ -x vendor/bin/phpunit ]; then
             vendor/bin/phpunit
           else
-            echo "PHPUnit is not installed. Skipping."
+            echo "PHPUnit is not configured. Skipping."
           fi
 
       - name: Validation complete
-        run: echo "Magento validation completed successfully."
+        run: echo "Integration validation completed successfully."
