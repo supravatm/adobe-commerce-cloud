@@ -13,6 +13,30 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Check Magento directories
+        working-directory: integration
+        run: |
+          echo "Current directory:"
+          pwd
+
+          echo "Magento directories:"
+          ls -ld src
+          ls -ld src/app
+          ls -ld src/app/design || true
+          ls -ld src/dev/tools/grunt/configs || true
+          ls -ld src/generated || true
+          ls -ld src/var || true
+
+          echo "Git tracked files:"
+          git ls-files src/app/design src/dev/tools/grunt/configs src/generated src/var
+      - name: Generate Docker versions
+        working-directory: integration
+        run: ./bin/detect-versions magento 2.4.9
+
+      - name: Start Magento
+        working-directory: integration
+        run: ./bin/start
+
       - name: Start Magento
         working-directory: integration
         run: ./bin/start
