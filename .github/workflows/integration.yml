@@ -24,6 +24,16 @@ jobs:
         working-directory: integration/src
         run: composer validate --no-check-publish
 
+       - name: Configure Magento Composer authentication
+        working-directory: integration/src
+        env:
+          MAGENTO_USERNAME: ${{ secrets.MAGENTO_USERNAME }}
+          MAGENTO_PASSWORD: ${{ secrets.MAGENTO_PASSWORD }}
+        run: |
+          composer config --global http-basic.repo.magento.com \
+            "$MAGENTO_USERNAME" \
+            "$MAGENTO_PASSWORD"
+
       - name: Install Composer dependencies
         working-directory: integration/src
         run: |
