@@ -28,7 +28,7 @@ jobs:
 
       - name: Build
         run: |
-          ./deployment/build.sh
+          ./deployment/build.sh integration
 
       - name: Deploy
         run: |
