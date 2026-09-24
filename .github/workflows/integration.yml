@@ -15,41 +15,41 @@ jobs:
 
       - name: Start Magento
         working-directory: integration
-        run: bin/start
+        run: ./bin/start
 
       - name: Check Magento containers
         working-directory: integration
-        run: bin/status
+        run: ./bin/status
 
       - name: Install Composer dependencies
         working-directory: integration
-        run: bin/composer install --no-interaction
+        run: ./bin/composer install --no-interaction
 
       - name: Compile Magento
         working-directory: integration
-        run: bin/magento setup:di:compile
+        run: ./bin/magento setup:di:compile
 
       - name: Enable maintenance mode
         working-directory: integration
-        run: bin/magento maintenance:enable
+        run: ./bin/magento maintenance:enable
 
       - name: Deploy Magento
         working-directory: integration
         run: |
-          bin/magento setup:upgrade
-          bin/magento cache:flush
-          bin/magento indexer:reindex
+          ./bin/magento setup:upgrade
+          ./bin/magento cache:flush
+          ./bin/magento indexer:reindex
 
       - name: Disable maintenance mode
         working-directory: integration
-        run: bin/magento maintenance:disable
+        run: ./bin/magento maintenance:disable
 
       - name: Post deployment cache warmup
         working-directory: integration
         run: |
-          bin/magento cache:flush
+          ./bin/magento cache:flush
 
-          BASE_URL=$(bin/magento config:show web/unsecure/base_url)
+          BASE_URL=$(./bin/magento config:show web/unsecure/base_url)
 
           echo "Warming cache: $BASE_URL"
 
