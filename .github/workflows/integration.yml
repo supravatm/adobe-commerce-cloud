@@ -20,6 +20,7 @@ jobs:
           php-version: '8.5'
           extensions: mbstring, intl, bcmath, soap, zip, pdo_mysql
           tools: composer
+          coverage: none
 
       - name: Validate Composer
         working-directory: integration/src
